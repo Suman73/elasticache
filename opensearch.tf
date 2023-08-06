@@ -7,6 +7,11 @@ terraform {
   }
 }
 
+provider "aws" {
+  region = "ap-south-1"
+  # No need to specify version here anymore
+}
+
 resource "aws_elasticsearch_domain" "default" {
   domain_name           = var.domain_name
   elasticsearch_version = var.elasticsearch_version
