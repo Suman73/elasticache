@@ -39,7 +39,7 @@ variable "availability_zone_count" {
 variable "ebs_volume_size" {
   type        = number
   description = "EBS volumes for data storage in GB"
-  default     = 8
+  default     = 20
 }
 
 variable "ebs_volume_type" {
