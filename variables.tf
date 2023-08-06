@@ -21,7 +21,7 @@ variable "instance_type" {
 variable "instance_count" {
   type        = number
   description = "Number of data nodes in the cluster"
-  default     = 1
+  default     = 2
 }
 
 variable "zone_awareness_enabled" {
