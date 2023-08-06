@@ -1,143 +1,67 @@
-variable "region" {
-  type    = "string"
-  default = "ap-south-1"
+provider "aws" {
+  region  = var.region
+  version = "~> 2.0"
 }
 
-variable "domain_name" {
-  type        = string
-  default     = "easyaws"
-  description = "name of Elasticsearch Domain"
-}
+resource "aws_elasticsearch_domain" "default" {
+  domain_name           = var.domain_name
+  elasticsearch_version = var.elasticsearch_version
 
-variable "elasticsearch_version" {
-  type        = string
-  default     = "6.5"
-  description = "Version of Elasticsearch to deploy"
-}
+  advanced_options = var.advanced_options
 
-variable "instance_type" {
-  type        = string
-  default     = "t2.micro.elasticsearch"
-  description = "Elasticsearch instance type for data nodes in the cluster"
-}
+  ebs_options {
+    ebs_enabled = var.ebs_volume_size > 0 ? true : false
+    volume_size = var.ebs_volume_size
+    volume_type = var.ebs_volume_type
+    iops        = var.ebs_iops
+  }
 
-variable "instance_count" {
-  type        = number
-  description = "Number of data nodes in the cluster"
-  default     = 1
-}
+  encrypt_at_rest {
+    enabled    = var.encrypt_at_rest_enabled
+    kms_key_id = var.encrypt_at_rest_kms_key_id
+  }
 
-variable "zone_awareness_enabled" {
-  type        = bool
-  default     = true
-  description = "Enable zone awareness for Elasticsearch cluster"
-}
+  cluster_config {
+    instance_count           = var.instance_count
+    instance_type            = var.instance_type
+    dedicated_master_enabled = var.dedicated_master_enabled
+    dedicated_master_count   = var.dedicated_master_count
+    dedicated_master_type    = var.dedicated_master_type
+    zone_awareness_enabled   = var.zone_awareness_enabled
 
-variable "availability_zone_count" {
-  type        = number
-  default     = 2
-  description = "Number of Availability Zones for the domain to use."
-}
+    zone_awareness_config {
+      availability_zone_count = var.availability_zone_count
+    }
+  }
 
-variable "ebs_volume_size" {
-  type        = number
-  description = "EBS volumes for data storage in GB"
-  default     = 8
-}
+  node_to_node_encryption {
+    enabled = var.node_to_node_encryption_enabled
+  }
 
-variable "ebs_volume_type" {
-  type        = string
-  default     = "gp2"
-  description = "Storage type of EBS volumes"
-}
+  snapshot_options {
+    automated_snapshot_start_hour = var.automated_snapshot_start_hour
+  }
 
-variable "ebs_iops" {
-  type        = number
-  default     = 0
-  description = "The baseline input/output (I/O) performance of EBS volumes attached to data nodes. Applicable only for the Provisioned IOPS EBS volume type"
-}
+  log_publishing_options {
+    enabled                  = var.log_publishing_index_enabled
+    log_type                 = "INDEX_SLOW_LOGS"
+    cloudwatch_log_group_arn = var.log_publishing_index_cloudwatch_log_group_arn
+  }
 
-variable "encrypt_at_rest_enabled" {
-  type        = bool
-  default     = false
-  description = "Whether to enable encryption at rest"
-}
+  log_publishing_options {
+    enabled                  = var.log_publishing_search_enabled
+    log_type                 = "SEARCH_SLOW_LOGS"
+    cloudwatch_log_group_arn = var.log_publishing_search_cloudwatch_log_group_arn
+  }
 
-variable "encrypt_at_rest_kms_key_id" {
-  type        = string
-  default     = ""
-  description = "The KMS key ID to encrypt the Elasticsearch domain with. If not specified, then it defaults to using the AWS/Elasticsearch service KMS key"
-}
+  log_publishing_options {
+    enabled                  = var.log_publishing_application_enabled
+    log_type                 = "ES_APPLICATION_LOGS"
+    cloudwatch_log_group_arn = var.log_publishing_application_cloudwatch_log_group_arn
+  }
 
-variable "log_publishing_index_enabled" {
-  type        = bool
-  default     = false
-  description = "Specifies whether log publishing option for INDEX_SLOW_LOGS is enabled or not"
-}
+  tags = {
+    Domain = "TestDomain"
+  }
 
-variable "log_publishing_search_enabled" {
-  type        = bool
-  default     = false
-  description = "Specifies whether log publishing option for SEARCH_SLOW_LOGS is enabled or not"
-}
-
-variable "log_publishing_application_enabled" {
-  type        = bool
-  default     = false
-  description = "Specifies whether log publishing option for ES_APPLICATION_LOGS is enabled or not"
-}
-
-variable "log_publishing_index_cloudwatch_log_group_arn" {
-  type        = string
-  default     = ""
-  description = "ARN of the CloudWatch log group to which log for INDEX_SLOW_LOGS needs to be published"
-}
-
-variable "log_publishing_search_cloudwatch_log_group_arn" {
-  type        = string
-  default     = ""
-  description = "ARN of the CloudWatch log group to which log for SEARCH_SLOW_LOGS needs to be published"
-}
-
-variable "log_publishing_application_cloudwatch_log_group_arn" {
-  type        = string
-  default     = ""
-  description = "ARN of the CloudWatch log group to which log for ES_APPLICATION_LOGS needs to be published"
-}
-
-variable "automated_snapshot_start_hour" {
-  type        = number
-  description = "Hour at which automated snapshots are taken, in UTC"
-  default     = 0
-}
-
-variable "dedicated_master_enabled" {
-  type        = bool
-  default     = false
-  description = "Indicates whether dedicated master nodes are enabled for the cluster"
-}
-
-variable "dedicated_master_count" {
-  type        = number
-  description = "Number of dedicated master nodes in the cluster"
-  default     = 0
-}
-
-variable "dedicated_master_type" {
-  type        = string
-  default     = "t2.small.elasticsearch"
-  description = "Instance type of the dedicated master nodes in the cluster"
-}
-
-variable "advanced_options" {
-  type        = map(string)
-  default     = {}
-  description = "Key-value string pairs to specify advanced configuration options"
-}
-
-
-variable "node_to_node_encryption_enabled" {
-  type        = bool
-  default     = false
-  description = "Whether to enable node-to-node encryption"
 }
