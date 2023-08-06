@@ -1,6 +1,10 @@
-provider "aws" {
-  region  = var.region
-  version = "~> 2.0"
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 2.0"
+    }
+  }
 }
 
 resource "aws_elasticsearch_domain" "default" {
